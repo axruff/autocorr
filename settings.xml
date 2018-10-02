@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!-- Settings for the Optical flow computation program -->
+<OpticalFlow>
+  
+  <Input>
+    <Path inputPath="c:\Users\fe0968\Documents\gpuflow3d\gpuflow2d\data\"/>
+    
+    <Mode Nx="128" Ny="128" imageType="8-bit">
+    	<Files file1 ="real_frame-128-128.raw" file2 ="frame2.raw"/>
+    </Mode>
+  </Input>
+
+  <Parameters>
+    <Method mode ="2d" run="flow" key="0" />
+
+    <Solver>
+      <Iterations inner="5" outer="20"/>
+      <Warping levels="20" scaling="0.9" medianRadius="5"/>
+      <Model sigma="0.45" alpha ="3.5" e_smooth="0.001" e_data="0.001"/>
+    </Solver>
+    
+  </Parameters>
+
+  <Output>
+    <Path outputPath="c:\Users\fe0968\Documents\gpuflow3d\gpuflow2d\data\output\"/>
+  </Output>
+</OpticalFlow>
