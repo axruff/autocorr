@@ -35,7 +35,7 @@
 
 #include "src/correlation/correlation_flow_2d.h"
 
-const bool key_press = true;
+const bool key_press = false;
 const bool use_visualization = false;
 const bool silent_mode = true;
 
@@ -59,16 +59,15 @@ int main(int argc, char** argv)
 
     
 
-    size_t width = 128;
-    size_t height = 100;
+    size_t width = 512;
+    size_t height = 256;
 
     /* Correlation flow variables */
     size_t  correlation_window_size = 18;
 
 
-    string  file_name1              = "real_frame-128-100.raw";
-    string  input_path              =  "c:\\Users\\fe0968\\Documents\\gpuflow3d\\gpuflow2d\\data\\";
-    string  output_path             =  "c:\\Users\\fe0968\\Documents\\gpuflow3d\\gpuflow2d\\data\\output\\";
+    string  file_name1              = "c:\\Users\\fe0968\\Documents\\autocorr\\data\\real_frame-512-256.raw";
+    string  output_path             =  "c:\\Users\\fe0968\\Documents\\autocorr\\data\\output\\";
     string  counter                 =  "";
 
     /*------------------------------------------------------*/
@@ -76,13 +75,13 @@ int main(int argc, char** argv)
     /*------------------------------------------------------*/
 
     if (argc == 5 || argc == 6)  {
-        file_name1 = argv[1];
+        file_name1 = string(argv[1]);
         width = atoi(argv[2]);
         height = atoi(argv[3]);
-        output_path = string(argv[5]);
+        output_path = string(argv[4]);
 
     if (argc == 6)
-        counter = argv[4];
+        counter = argv[5];
     }
     else if (argc != 1) {
         cout<<"Usage: "<< argv[0] <<" <settings file>. Otherwise settings.xml in the current directory is used"<<endl;
@@ -97,7 +96,7 @@ int main(int argc, char** argv)
     DataSize3 image_size ={ width, height, 1 };
 
     /* Load input data */
-    if (!image.ReadRAWFromFileF32((input_path + file_name1).c_str(), image_size.width, image_size.height)) {
+    if (!image.ReadRAWFromFileF32(file_name1.c_str(), image_size.width, image_size.height)) {
         //if (!image.ReadRAWFromFileU8("./data/squares_many.raw", image_size.width, image_size.height)) {
         //if (!image.ReadRAWFromFileF32("./data/73_flat_corr.raw", image_size.width, image_size.height)) {
         return 2;
