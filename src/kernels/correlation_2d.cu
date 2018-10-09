@@ -420,14 +420,20 @@ extern "C" __global__ void select_peak_2d(
         float x = 0.0f;
         float y = 0.0f;
 
-        m = (m1 > m2) ? m1 : m2;
-        x = (m1 > m2) ? x1 : x2;
-        y = (m1 > m2) ? y1 : y2;
+        // Select maximum peak with larger x-component (assume movement to the right)
+        m = (m1 > m2 && x1 > x2) ? m1 : m2;
+        x = (m1 > m2 && x1 > x2) ? x1 : x2;
+        y = (m1 > m2 && x1 > x2) ? y1 : y2;
+
+        //m = (m1 > m2) ? m1 : m2;
+        //x = (m1 > m2) ? x1 : x2;
+        //y = (m1 > m2) ? y1 : y2;
 
 
         corr[IND(global_id.x, global_id.y )] = m;
-        flow_x[IND(global_id.x, global_id.y)] = x - window_size / 2.0;
-        flow_y[IND(global_id.x, global_id.y)] = y - window_size / 2.0;
+        flow_x[IND(global_id.x, global_id.y)] = ((x > 0.0f) ? x - window_size / 2.0 : 0.0f);
+        flow_y[IND(global_id.x, global_id.y)] = ((y > 0.0f) ? y - window_size / 2.0 : 0.0f);
+
     }
 
 }
