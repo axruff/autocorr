@@ -44,11 +44,6 @@ int main(int argc, char** argv)
 {
 
 
-    /* Initialize CUDA */
-    CUcontext cu_context;
-    if (!InitCudaContextWithFirstAvailableDevice(&cu_context)) {
-        return 1;
-    }
 
     std::printf("//----------------------------------------------------------------------//\n");
     std::printf("//        2D Correlation flow (Test) using NVIDIA CUDA. Version 0.5	   \n");
@@ -59,28 +54,30 @@ int main(int argc, char** argv)
 
     
 
-    size_t width = 512;
-    size_t height = 256;
+    size_t width = 128;
+    size_t height = 128;
 
     /* Correlation flow variables */
-    size_t  correlation_window_size = 18;
+    size_t  correlation_window_size = 30;
 
 
-    string  file_name1              = "c:\\Users\\fe0968\\Documents\\autocorr\\data\\real_frame-512-256.raw";
+    string  file_name1              = "c:\\Users\\fe0968\\Documents\\autocorr\\data\\real_frame-128-128.raw";
     string  output_path             =  "c:\\Users\\fe0968\\Documents\\autocorr\\data\\output\\";
     string  counter                 =  "";
+
+    int  gpu_index = 0;
 
     /*------------------------------------------------------*/
     /*               Correlation algorithm                  */
     /*------------------------------------------------------*/
 
-    if (argc == 5 || argc == 6)  {
+    if (argc >= 5)  {
         file_name1 = string(argv[1]);
         width = atoi(argv[2]);
         height = atoi(argv[3]);
         output_path = string(argv[4]);
 
-    if (argc == 6)
+    if (argc > 5)
         counter = argv[5];
     }
     else if (argc != 1) {
@@ -88,6 +85,17 @@ int main(int argc, char** argv)
     return 0;
 
     }
+
+    if (argc > 6)
+        gpu_index = atoi(argv[6]);
+
+
+    /* Initialize CUDA */
+    CUcontext cu_context;
+    if (!InitCudaContextWithFirstAvailableDevice(&cu_context, gpu_index)) {
+        return 1;
+    }
+
 
     /* Correlation flow computation class */
     CorrelationFlow2D correlation_flow;
@@ -134,9 +142,9 @@ int main(int argc, char** argv)
         flow_y.WriteRAWToFileF32(std::string(output_path + counter + "corr-flow-y" + filename).c_str());
         corr.WriteRAWToFileF32(std::string(output_path + counter + "corr-coeff" + filename).c_str());
 
-        corr_temp.WriteRAWToFileF32(std::string(output_path + "corr-temp" + filename_ext).c_str());
+        //corr_temp.WriteRAWToFileF32(std::string(output_path + "corr-temp" + filename_ext).c_str());
 
-        IOUtils::WriteFlowToImageRGB(flow_x, flow_y, 3, output_path + counter + "corr-res.pgm");
+        IOUtils::WriteFlowToImageRGB(flow_x, flow_y, 10, output_path + counter + "corr-res.pgm");
 
         IOUtils::WriteMagnitudeToFileF32(flow_x, flow_y, std::string(output_path + counter + "corr-amp" + filename).c_str());
 

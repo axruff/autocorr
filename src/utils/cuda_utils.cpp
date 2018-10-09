@@ -23,7 +23,7 @@
 
 #include <cstring>
 
-bool InitCudaContextWithFirstAvailableDevice(CUcontext* cu_context)
+bool InitCudaContextWithFirstAvailableDevice(CUcontext* cu_context, int gpu_index)
 {
   if (CheckCudaError(cuInit(0))) {
     return false;
@@ -40,9 +40,11 @@ bool InitCudaContextWithFirstAvailableDevice(CUcontext* cu_context)
     return false;
   }
 
-  if (CheckCudaError(cuDeviceGet(&cu_device, 0))) {
+  if (CheckCudaError(cuDeviceGet(&cu_device, gpu_index))) {
     return false;
   }
+
+  printf("CUDA Devices count: %d. Current device: %d\n", cu_device_count, gpu_index);
 
   char cu_device_name[64];
   if (CheckCudaError(cuDeviceGetName(cu_device_name, 64, cu_device))) {

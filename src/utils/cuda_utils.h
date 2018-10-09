@@ -50,7 +50,7 @@ inline bool __CheckCudaError(CUresult error, const char* file, const int line)
   return false;
 }
 
-bool InitCudaContextWithFirstAvailableDevice(CUcontext* cu_context);
+bool InitCudaContextWithFirstAvailableDevice(CUcontext* cu_context, int gpu_index);
 
 void CopyData2DtoDevice(Data2D& data2d, CUdeviceptr device_ptr, size_t device_height, size_t device_pitch);
 void CopyData2DFromDevice(CUdeviceptr device_ptr, Data2D& data2d, size_t device_height, size_t device_pitch);
