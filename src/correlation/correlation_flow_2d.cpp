@@ -203,11 +203,12 @@ bool CorrelationFlow2D::InitCudaMemory()
         std::printf("Allocated\t:\t%.0fMB\n", allocated_memory / static_cast<float>(1024 * 1024));
         return true;
     }
+    std::printf("ERROR: Not enough memory");
     return false;
 }
 
 
-void CorrelationFlow2D::ComputeFlow(Data2D& image, Data2D& flow_x, Data2D& flow_y, Data2D& corr, Data2D& corr_temp, OperationParameters& params)
+void CorrelationFlow2D::ComputeFlow(Data2D& image, Data2D& flow_x, Data2D& flow_y, Data2D& corr, Data2D& peak_h, Data2D& corr_temp, OperationParameters& params)
 {
     if (!IsInitialized()) {
         return;
@@ -244,6 +245,8 @@ void CorrelationFlow2D::ComputeFlow(Data2D& image, Data2D& flow_x, Data2D& flow_
     cuda_memory_ptrs_.pop();
     CUdeviceptr dev_corr = cuda_memory_ptrs_.top();
     cuda_memory_ptrs_.pop();
+    CUdeviceptr dev_peak_h = cuda_memory_ptrs_.top();
+    cuda_memory_ptrs_.pop();
 
 
 
@@ -259,6 +262,7 @@ void CorrelationFlow2D::ComputeFlow(Data2D& image, Data2D& flow_x, Data2D& flow_
     op.PushValuePtr("flow_x", &dev_flow_x);
     op.PushValuePtr("flow_y", &dev_flow_y);
     op.PushValuePtr("corr", &dev_corr);
+    op.PushValuePtr("peak_h", &dev_peak_h);
 
     op.PushValuePtr("corr_window_size", &correlation_window_size_);
 
@@ -276,6 +280,7 @@ void CorrelationFlow2D::ComputeFlow(Data2D& image, Data2D& flow_x, Data2D& flow_
     CopyData2DFromDevice(dev_flow_x, flow_x, dev_container_size_.height, dev_container_size_.pitch);
     CopyData2DFromDevice(dev_flow_y, flow_y, dev_container_size_.height, dev_container_size_.pitch);
     CopyData2DFromDevice(dev_corr, corr, dev_container_size_.height, dev_container_size_.pitch);
+    CopyData2DFromDevice(dev_peak_h, peak_h, dev_container_size_.height, dev_container_size_.pitch);
 
     CopyData2DFromDevice(dev_container_extended_corr, corr_temp, dev_container_extended_size_.height, dev_container_extended_size_.pitch);
 
@@ -296,6 +301,7 @@ void CorrelationFlow2D::ComputeFlow(Data2D& image, Data2D& flow_x, Data2D& flow_
     cuda_memory_ptrs_.push(dev_flow_x);
     cuda_memory_ptrs_.push(dev_flow_y);
     cuda_memory_ptrs_.push(dev_corr);
+    cuda_memory_ptrs_.push(dev_peak_h);
 
 
 }

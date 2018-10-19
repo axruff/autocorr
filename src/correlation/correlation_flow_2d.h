@@ -42,7 +42,7 @@ private:
     CUdeviceptr dev_container_extended_corr;
     CUdeviceptr dev_container_extended_corr_max;
 
-    const size_t dev_containers_count_ = 4;
+    const size_t dev_containers_count_ = 5;
     
     size_t correlation_window_size_ = -1;
 
@@ -66,7 +66,7 @@ public:
     const char* GetName() const;
 
     bool Initialize(const DataSize3& data_size, const size_t correlation_window_size);
-    void ComputeFlow(Data2D& image, Data2D& flow_x, Data2D& flow_y, Data2D& corr, Data2D& corr_temp, OperationParameters& params);
+    void ComputeFlow(Data2D& image, Data2D& flow_x, Data2D& flow_y, Data2D& corr, Data2D& peak_h, Data2D& corr_temp, OperationParameters& params);
     void Destroy();
 
     bool silent = false;

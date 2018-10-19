@@ -35,7 +35,7 @@
 
 #include "src/correlation/correlation_flow_2d.h"
 
-const bool key_press = false;
+const bool key_press = true;
 const bool use_visualization = false;
 const bool silent_mode = true;
 
@@ -54,14 +54,14 @@ int main(int argc, char** argv)
 
     
 
-    size_t width = 128;
-    size_t height = 128;
+    size_t width = 256;
+    size_t height = 256;
 
     /* Correlation flow variables */
     size_t  correlation_window_size = 30;
 
 
-    string  file_name1              = "c:\\Users\\fe0968\\Documents\\autocorr\\data\\real_frame-128-128.raw";
+    string  file_name1              = "c:\\Users\\fe0968\\Documents\\autocorr\\data\\test_peak-256-256.raw";
     string  output_path             =  "c:\\Users\\fe0968\\Documents\\autocorr\\data\\output\\";
     string  counter                 =  "";
 
@@ -118,6 +118,7 @@ int main(int argc, char** argv)
         Data2D flow_x(image_size.width, image_size.height);
         Data2D flow_y(image_size.width, image_size.height);
         Data2D corr(image_size.width, image_size.height);
+        Data2D peak_h(image_size.width, image_size.height);
 
         Data2D corr_temp(image_size.width*correlation_window_size, image_size.height*correlation_window_size);
 
@@ -128,7 +129,7 @@ int main(int argc, char** argv)
         //params.PushValuePtr("warp_scale_factor", &warp_scale_factor);
 
 
-        correlation_flow.ComputeFlow(image, flow_x, flow_y, corr, corr_temp, params);
+        correlation_flow.ComputeFlow(image, flow_x, flow_y, corr, peak_h, corr_temp, params);
 
         std::string filename =
             "-" + std::to_string(width) +
@@ -141,6 +142,7 @@ int main(int argc, char** argv)
         flow_x.WriteRAWToFileF32(std::string(output_path + counter + "corr-flow-x" + filename).c_str());
         flow_y.WriteRAWToFileF32(std::string(output_path + counter + "corr-flow-y" + filename).c_str());
         corr.WriteRAWToFileF32(std::string(output_path + counter + "corr-coeff" + filename).c_str());
+        peak_h.WriteRAWToFileF32(std::string(output_path + counter + "corr-peak-h" + filename).c_str());
 
         //corr_temp.WriteRAWToFileF32(std::string(output_path + "corr-temp" + filename_ext).c_str());
 

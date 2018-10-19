@@ -366,7 +366,8 @@ extern "C" __global__ void select_peak_2d(
     const size_t extended_pitch,
     float* flow_x,
     float* flow_y,
-    float* corr
+    float* corr,
+    float* peak_h
     )
 {
     dim3 global_id(blockDim.x * blockIdx.x + threadIdx.x,
@@ -417,22 +418,54 @@ extern "C" __global__ void select_peak_2d(
 
  
         float m = 0.0f;
-        float x = 0.0f;
-        float y = 0.0f;
+        int x = 0;
+        int y = 0;
 
         // Select maximum peak with larger x-component (assume movement to the right)
         m = (m1 > m2 && x1 > x2) ? m1 : m2;
         x = (m1 > m2 && x1 > x2) ? x1 : x2;
         y = (m1 > m2 && x1 > x2) ? y1 : y2;
 
-        //m = (m1 > m2) ? m1 : m2;
-        //x = (m1 > m2) ? x1 : x2;
-        //y = (m1 > m2) ? y1 : y2;
 
+        int xc = window_size / 2.0 - 1;
+        int yc = window_size / 2.0 - 1;
+
+        int vx =  x - xc;
+        int vy =  y - yc;
+
+        // Get peak height
+        float dist = sqrtf(vx*vx + vy*vy);
+        float step = vx / dist;
+
+        float min_peak_value = 1000;
+
+        float yi = 0.0f;
+
+        for (float xi=step; xi < vx; xi=xi+step) {
+            
+            yi = (vy / vx)*xi;
+
+            int xr = (int)floorf(xi);
+            int yr = (int)floorf(yi);
+
+            float dx = xi - (float)x;
+            float dy = yi - (float)y;
+
+            //float val = (1.0-dx)*(1.0-dy)*input[EIND(global_x *window_size+xc+x, global_y*window_size+yc+y)] +
+            //    (1.0-dx)*dy*input[EIND(global_x *window_size+xc+x, global_y*window_size+yc+y+1)] +
+            //    dx*(1.0-dy)*input[EIND(global_x *window_size+xc+x+1, global_y*window_size+yc+y)]  +
+            //    dx*dy*input[EIND(global_x *window_size+xc+x+1, global_y*window_size+yc+y+1)];
+
+           /* if (val < min_peak_value)
+                min_peak_value = val;*/
+
+       
+        }
 
         corr[IND(global_id.x, global_id.y )] = m;
-        flow_x[IND(global_id.x, global_id.y)] = ((x > 0.0f) ? x - window_size / 2.0 : 0.0f);
-        flow_y[IND(global_id.x, global_id.y)] = ((y > 0.0f) ? y - window_size / 2.0 : 0.0f);
+        flow_x[IND(global_id.x, global_id.y)] = (x > 0) ? vx : 0.0f;
+        flow_y[IND(global_id.x, global_id.y)] = (y > 0) ? vy : 0.0f;
+        //peak_h[IND(global_id.x, global_id.y)] = m;
 
     }
 

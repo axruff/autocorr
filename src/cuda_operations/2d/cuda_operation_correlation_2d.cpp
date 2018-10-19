@@ -90,6 +90,7 @@ void CudaOperationCorrelation2D::Execute(OperationParameters& params)
   CUdeviceptr dev_flow_x;
   CUdeviceptr dev_flow_y;
   CUdeviceptr dev_corr;
+  CUdeviceptr dev_peak_h;
 
   CUdeviceptr dev_corr_ext;
   CUdeviceptr dev_corr_max_ext;
@@ -104,6 +105,7 @@ void CudaOperationCorrelation2D::Execute(OperationParameters& params)
   GET_PARAM_OR_RETURN(params, CUdeviceptr, dev_flow_x, "flow_x");
   GET_PARAM_OR_RETURN(params, CUdeviceptr, dev_flow_y, "flow_y");
   GET_PARAM_OR_RETURN(params, CUdeviceptr, dev_corr, "corr");
+  GET_PARAM_OR_RETURN(params, CUdeviceptr, dev_peak_h, "peak_h");
 
   GET_PARAM_OR_RETURN(params, CUdeviceptr, dev_corr_ext, "corr_ext");
   GET_PARAM_OR_RETURN(params, CUdeviceptr, dev_corr_max_ext, "corr_max_ext");
@@ -232,7 +234,7 @@ void CudaOperationCorrelation2D::Execute(OperationParameters& params)
     needed_shared_memory_size = 0;
 
 
-    void* args3[8] ={
+    void* args3[9] ={
         &dev_corr_max_ext,
         &data_size.width,
         &data_size.height,
@@ -240,7 +242,8 @@ void CudaOperationCorrelation2D::Execute(OperationParameters& params)
         &extended_pitch_size,
         &dev_flow_x,
         &dev_flow_y,
-        &dev_corr};
+        &dev_corr,
+        &dev_peak_h};
 
     CheckCudaError(cuLaunchKernel(cuf_select_peak_,
         grid_dim.x, grid_dim.y, grid_dim.z,
