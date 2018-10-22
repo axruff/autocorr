@@ -282,7 +282,7 @@ void CorrelationFlow2D::ComputeFlow(Data2D& image, Data2D& flow_x, Data2D& flow_
     CopyData2DFromDevice(dev_corr, corr, dev_container_size_.height, dev_container_size_.pitch);
     CopyData2DFromDevice(dev_peak_h, peak_h, dev_container_size_.height, dev_container_size_.pitch);
 
-    CopyData2DFromDevice(dev_container_extended_corr, corr_temp, dev_container_extended_size_.height, dev_container_extended_size_.pitch);
+    CopyData2DFromDevice(dev_container_extended_corr_max, corr_temp, dev_container_extended_size_.height, dev_container_extended_size_.pitch);
 
     /* Estimate GPU computation time */
     CheckCudaError(cuEventRecord(cu_event_stop, NULL));

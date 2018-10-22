@@ -234,8 +234,9 @@ void CudaOperationCorrelation2D::Execute(OperationParameters& params)
     needed_shared_memory_size = 0;
 
 
-    void* args3[9] ={
+    void* args3[10] ={
         &dev_corr_max_ext,
+        &dev_corr_ext,
         &data_size.width,
         &data_size.height,
         &corr_window_size,

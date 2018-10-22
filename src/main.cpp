@@ -58,7 +58,7 @@ int main(int argc, char** argv)
     size_t height = 256;
 
     /* Correlation flow variables */
-    size_t  correlation_window_size = 30;
+    size_t  correlation_window_size = 22;
 
 
     string  file_name1              = "c:\\Users\\fe0968\\Documents\\autocorr\\data\\test_peak-256-256.raw";

@@ -359,7 +359,8 @@ extern "C" __global__ void find_peak_2d(
 
 
 extern "C" __global__ void select_peak_2d(
-    const float* input,
+    const float* peaks_ext,
+    const float* corr_ext,
     const size_t width,
     const size_t height,
     const size_t window_size,
@@ -396,7 +397,7 @@ extern "C" __global__ void select_peak_2d(
             for (int j=0; j<window_size; j++) {
           
 
-                float val = input[EIND(global_x *window_size+i, global_y*window_size+j)];
+                float val = peaks_ext[EIND(global_x *window_size+i, global_y*window_size+j)];
 
 
                 if (val > m1 && (fabsf(val - 1.0f) > EPS)) {
@@ -422,49 +423,80 @@ extern "C" __global__ void select_peak_2d(
         int y = 0;
 
         // Select maximum peak with larger x-component (assume movement to the right)
-        m = (m1 > m2 && x1 > x2) ? m1 : m2;
-        x = (m1 > m2 && x1 > x2) ? x1 : x2;
-        y = (m1 > m2 && x1 > x2) ? y1 : y2;
+        //m = (m1 > m2 && x1 > x2) ? m1 : m2;
+        //x = (m1 > m2 && x1 > x2) ? x1 : x2;
+        //y = (m1 > m2 && x1 > x2) ? y1 : y2;
+
+        m = (x1 > x2) ? m1 : m2;
+        x = (x1 > x2) ? x1 : x2;
+        y = (x1 > x2) ? y1 : y2;
 
 
-        int xc = window_size / 2.0 - 1;
-        int yc = window_size / 2.0 - 1;
+        int xc = window_size / 2.0;
+        int yc = window_size / 2.0;
 
         int vx =  x - xc;
         int vy =  y - yc;
 
+        
+        float dist, step, alpha, min_peak_value, yi;
+
+
         // Get peak height
-        float dist = sqrtf(vx*vx + vy*vy);
-        float step = vx / dist;
+        if (vx > 0) {
+            dist = sqrtf(vx*vx + vy*vy);
+            step = vx / dist;
+            alpha = (float)vy / (float)vx;
 
-        float min_peak_value = 1000;
+            min_peak_value = 1000;
 
-        float yi = 0.0f;
+            yi = 0.0f;
 
-        for (float xi=step; xi < vx; xi=xi+step) {
-            
-            yi = (vy / vx)*xi;
+            if (global_x == 80 && global_y == 100) {
+                std::printf("\n");
+                std::printf("vx: %d \n", vx);
+                std::printf("vy: %d \n", vy);
+                std::printf("dist: %f \n", dist);
+                std::printf("step: %f \n", step);
+                std::printf("alpha: %f \n", alpha);
+                std::printf("corr: %f \n", m);
+                std::printf("--------------\n");
 
-            int xr = (int)floorf(xi);
-            int yr = (int)floorf(yi);
 
-            float dx = xi - (float)x;
-            float dy = yi - (float)y;
+            }
 
-            //float val = (1.0-dx)*(1.0-dy)*input[EIND(global_x *window_size+xc+x, global_y*window_size+yc+y)] +
-            //    (1.0-dx)*dy*input[EIND(global_x *window_size+xc+x, global_y*window_size+yc+y+1)] +
-            //    dx*(1.0-dy)*input[EIND(global_x *window_size+xc+x+1, global_y*window_size+yc+y)]  +
-            //    dx*dy*input[EIND(global_x *window_size+xc+x+1, global_y*window_size+yc+y+1)];
+            for (float xi=step; xi < vx; xi=xi+step) {
 
-           /* if (val < min_peak_value)
-                min_peak_value = val;*/
+                yi = alpha*xi;
 
-       
+                int xr = (int)floorf(xi);
+                int yr = (int)floorf(yi);
+
+                float dx = xi - (float)xr;
+                float dy = yi - (float)yr;
+
+                float val = (1.0-dx)*(1.0-dy)*corr_ext[EIND(global_x *window_size+xc+xr, global_y*window_size+yc+yr)] +
+                    (1.0-dx)*dy*corr_ext[EIND(global_x *window_size+xc+xr, global_y*window_size+yc+yr+1)] +
+                    dx*(1.0-dy)*corr_ext[EIND(global_x *window_size+xc+xr+1, global_y*window_size+yc+yr)]  +
+                    dx*dy*corr_ext[EIND(global_x *window_size+xc+xr+1, global_y*window_size+yc+yr+1)];
+
+                if (val < min_peak_value)
+                    min_peak_value = val;
+
+                if (global_x == 80 && global_y == 100) {
+                    std::printf("val:%f x:%f y%f \n", val, xi, yi);
+                }
+
+            }
         }
+        else
+            min_peak_value = m;
+
 
         corr[IND(global_id.x, global_id.y )] = m;
-        flow_x[IND(global_id.x, global_id.y)] = (x > 0) ? vx : 0.0f;
-        flow_y[IND(global_id.x, global_id.y)] = (y > 0) ? vy : 0.0f;
+        flow_x[IND(global_id.x, global_id.y)] = (vx > 0) ? vx : 0.0f;
+        flow_y[IND(global_id.x, global_id.y)] = (vx > 0) ? vy : 0.0f;
+        peak_h[IND(global_id.x, global_id.y)] = m - min_peak_value;
         //peak_h[IND(global_id.x, global_id.y)] = m;
 
     }
